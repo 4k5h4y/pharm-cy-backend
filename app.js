@@ -11,7 +11,7 @@ const salesRoutes = require('./routes/sales');
 const cors = require('cors');
 
 
-mongoose.connect('mongodb://localhost:27017', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb+srv://farm-cy-atlas:aksh1234@cluster0.bzbvo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('connected to database!');
   })
