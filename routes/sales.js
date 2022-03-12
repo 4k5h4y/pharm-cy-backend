@@ -3,9 +3,11 @@ const router = express.Router();
 const checkAuth = require("../middleware/check-auth");
 
 const Sales = require('../models/sales');
+const User = require('../models/user')
 
 router.post("", (req, res, next) => {
   const sales = new Sales({
+    customerName: req.body.customerName,
     drugName: req.body.drugName,
     totalPrice: req.body.totalPrice,
     tax: req.body.tax,
@@ -13,14 +15,13 @@ router.post("", (req, res, next) => {
     balance: req.body.balance
   });
 
-  sales.save().then(createdSales => {
+  User.updateOne({ _id: req.body.userId }, { $addToSet: { "sales": sales } }).then(newSale => {
+    console.log(" sale completed ", newSale)
     res.status(201).json({
-      message: 'Sales Added Successfully',
-      salesId: createdSales._id
+      message: ' sale completed ',
+      inventory: newSale['_doc']
     });
-
   });
-
 });
 
 router.get("/getSalesChartInfo", (req, res, next) => {
@@ -28,13 +29,15 @@ router.get("/getSalesChartInfo", (req, res, next) => {
   Sales.aggregate([{
     "$project": {
       "paidAmount": 1,
+      "balance": 1,
       "month": { "$month": "$dateTime" }
     }
   },
   {
     "$group": {
       "_id": "$month",
-      "total": { "$sum": { $toDouble: "$paidAmount" } }
+      "totalSale": { "$sum": { $toDouble: "$paidAmount" } },
+      "totalBalance": { "$sum": { $toDouble: "$balance" } }
     }
   }
   ])

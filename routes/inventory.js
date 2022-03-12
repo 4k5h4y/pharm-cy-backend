@@ -3,6 +3,7 @@ const router = express.Router();
 const nodemailer = require("nodemailer");
 const checkAuth = require("../middleware/check-auth");
 const Inventory = require('../models/inventory');
+const User = require('../models/user')
 
 router.post("", (req, res, next) => {
   const inventory = new Inventory({
@@ -13,7 +14,9 @@ router.post("", (req, res, next) => {
     expiryDate: req.body.expiryDate,
     price: req.body.price,
   });
-  inventory.save().then(createdInventory => {
+
+  User.updateOne({ _id: req.body.userId }, { $addToSet: { "inventory": inventory } }).then(createdInventory => {
+    console.log(" added inventory ", createdInventory)
     res.status(201).json({
       message: 'Item Added Successfully',
       inventory: createdInventory['_doc']
@@ -21,23 +24,22 @@ router.post("", (req, res, next) => {
   });
 });
 
-
-router.put("/:id", (req, res, next) => {
-  const inventory = new Inventory({
-    _id: req.body.id,
-    name: req.body.name,
-    drug: req.body.drug,
-    quantity: req.body.quantity,
-    batchId: req.body.batchId,
-    expiryDate: new Date(req.body.expiryDate),
-    price: req.body.price,
-  });
-  console.log(inventory);
-  Inventory.updateOne({ _id: req.params.id }, inventory).then(result => {
-    console.log(result);
-    res.status(200).json({ message: "Updated Successfully !" });
-  });
-});
+// router.put("/:id", (req, res, next) => {
+//   const inventory = {
+//     _id: req.body.id,
+//     name: req.body.name,
+//     drug: req.body.drug,
+//     quantity: req.body.quantity,
+//     batchId: req.body.batchId,
+//     expiryDate: new Date(req.body.expiryDate),
+//     price: req.body.price,
+//   };
+//   for (let prop in inventory) if (!inventory[prop]) delete inventory[prop]
+//   User.updateOne({ _id: req.params.id }, { $set: { "inventory.$": inventory } }).then(result => {
+//     console.log(result);
+//     res.status(200).json({ message: "Updated Successfully !" });
+//   });
+// });
 
 
 router.put("/updateQuantity/:id", (req, res, next) => {

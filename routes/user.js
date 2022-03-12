@@ -12,7 +12,9 @@ router.post("/signup", (req, res, next) => {
         contact: req.body.contact,
         email: req.body.email,
         password: hash,
-        role: req.body.role
+        role: req.body.role,
+        inventory: [],
+        sales: []
       });
 
       user.save()
@@ -102,16 +104,17 @@ router.get("/:id", (req, res, next) => {
 router.put("/:id", (req, res, next) => {
   bcrypt.hash(req.body.password, 10)
     .then(hash => {
-      const user = new User({
-        _id: req.body.id,
+      var upatedUser = {
         name: req.body.name,
         email: req.body.email,
         contact: req.body.contact,
         password: hash,
         role: req.body.role
-      });
+      }
 
-      User.updateOne({ _id: req.params.id }, user)
+      for (let prop in upatedUser) if (!upatedUser[prop]) delete upatedUser[prop]
+
+      User.updateOne({ _id: req.params.id }, { $set: upatedUser })
         .then(result => {
           console.log(result);
           res.status(200).json({ message: "Update user Successful !" });
